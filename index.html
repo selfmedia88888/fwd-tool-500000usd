@@ -101,31 +101,57 @@
         .currency-container .toggle-btn.active {
             color: #0284C7;
         }
+        
+        /* 優化後的進度條區塊 */
         .slider-section {
             background: #FFF7ED;
-            padding: 25px;
+            padding: 30px 25px;
             border-radius: 16px;
             border: 1px solid #FFEDD5;
             margin-bottom: 35px;
             text-align: center;
         }
         .age-display {
-            font-size: 42px;
+            font-size: 46px;
             color: var(--fwd-orange);
             font-weight: 800;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
         .year-display {
             font-size: 14px;
             color: var(--gray-text);
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .slider-wrapper {
+            max-width: 650px;
+            margin: 0 auto;
+            position: relative;
+            padding: 0 10px;
         }
         input[type=range] {
             width: 100%;
-            max-width: 600px;
             accent-color: var(--fwd-orange);
-            height: 6px;
+            height: 8px;
+            margin: 0;
+            cursor: pointer;
         }
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--gray-text);
+            font-weight: 500;
+        }
+        .label-start {
+            color: #0284C7;
+            font-weight: bold;
+        }
+        .label-end {
+            color: #B45309;
+            font-weight: bold;
+        }
+
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -212,7 +238,14 @@
     <div class="slider-section">
         <div class="age-display"><span id="current-age">71</span> 歲</div>
         <div class="year-display">保單年度：第 <span id="policy-year">10</span> 年</div>
-        <input type="range" id="age-slider" min="66" max="91" value="71" step="1">
+        
+        <div class="slider-wrapper">
+            <input type="range" id="age-slider" min="66" max="91" value="71" step="1">
+            <div class="slider-labels">
+                <span class="label-start">🏁 66 歲 (期滿全面回本)</span>
+                <span class="label-end">🏛️ 91 歲 (尊榮資產傳承)</span>
+            </div>
+        </div>
     </div>
 
     <div class="grid-3">
@@ -273,7 +306,6 @@
 </div>
 
 <script>
-    // 原始美金精確數據矩陣
     const db = {
         66: { y: 5,  pA_rv: 297276, pA_lv: 500000, pB_w: 0,      pB_rv: 297276, pB_lv: 500000, pC_w: 0,      pC_rv: 297276, pC_lv: 500000 },
         67: { y: 6,  pA_rv: 500007, pA_lv: 521404, pB_w: 35000,  pB_rv: 465007, pB_lv: 486404, pC_w: 0,      pC_rv: 500007, pC_lv: 521404 },
@@ -305,13 +337,12 @@
 
     let currentMode = 'retire'; 
     let currentCurrency = 'USD';
-    const rate = 30; // 固定匯率 30
+    const rate = 30;
 
     const slider = document.getElementById('age-slider');
     const ageDisp = document.getElementById('current-age');
     const yearDisp = document.getElementById('policy-year');
 
-    // 切換退休/傳承模式
     function setMode(mode) {
         currentMode = mode;
         document.getElementById('btn-retire').classList.toggle('active', mode === 'retire');
@@ -324,13 +355,11 @@
         updateDashboard(slider.value);
     }
 
-    // 切換美元/台幣幣別
     function setCurrency(currency) {
         currentCurrency = currency;
         document.getElementById('btn-usd').classList.toggle('active', currency === 'USD');
         document.getElementById('btn-twd').classList.toggle('active', currency === 'TWD');
         
-        // 更新上方黑金字卡的基本資料
         if (currency === 'USD') {
             document.getElementById('info-face').innerText = 'USD 500,000';
             document.getElementById('info-principal').innerText = 'USD 479,000';
@@ -344,7 +373,6 @@
         updateDashboard(slider.value);
     }
 
-    // 格式化數字輸出（帶有千分位與幣別前綴）
     function formatNum(val) {
         const factor = currentCurrency === 'USD' ? 1 : rate;
         const prefix = currentCurrency === 'USD' ? '$' : 'NT$ ';
@@ -357,24 +385,19 @@
         ageDisp.innerText = age;
         yearDisp.innerText = data.y;
 
-        // 決定基本變數來源是退保價值(rv)還是身故權益(lv)
         const raw_vA = currentMode === 'retire' ? data.pA_rv : data.pA_lv;
         const raw_vB = currentMode === 'retire' ? data.pB_rv : data.pB_lv;
         const raw_vC = currentMode === 'retire' ? data.pC_rv : data.pC_lv;
 
-        // 方案 A 渲染
         document.getElementById('v-pA').innerText = formatNum(raw_vA);
-        // 倍數一律依據當前幣別對比
         const basePrincipal = currentCurrency === 'USD' ? 479000 : (479000 * rate);
         const currentValA = currentCurrency === 'USD' ? raw_vA : (raw_vA * rate);
         document.getElementById('m-pA').innerText = (currentValA / basePrincipal).toFixed(2) + ' 倍';
 
-        // 方案 B 渲染
         document.getElementById('w-pB').innerText = formatNum(data.pB_w);
         document.getElementById('v-pB').innerText = formatNum(raw_vB);
         document.getElementById('t-pB').innerText = formatNum(data.pB_w + raw_vB);
 
-        // 方案 C 渲染
         document.getElementById('w-pC').innerText = formatNum(data.pC_w);
         document.getElementById('v-pC').innerText = formatNum(raw_vC);
         document.getElementById('t-pC').innerText = formatNum(data.pC_w + raw_vC);
@@ -384,7 +407,6 @@
         updateDashboard(this.value);
     });
 
-    // 初始渲染
     setCurrency('USD');
 </script>
 
