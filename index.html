@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>富衛盈聚天下 II - 尊榮資產模擬系統</title>
+    <style>
+        :root {
+            --fwd-orange: #FF6B00;
+            --dark-blue: #0F172A;
+            --light-bg: #F8FAFC;
+            --gray-text: #64748B;
+            --tab-active: #FF6B00;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-blue);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: var(--dark-blue);
+            font-size: 26px;
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            color: var(--gray-text);
+            font-size: 14px;
+            margin: 0;
+        }
+        .client-card {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+            color: white;
+            padding: 22px;
+            border-radius: 14px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(15,23,42,0.15);
+        }
+        .client-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FDBA74;
+            margin-bottom: 10px;
+        }
+        .client-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        .mode-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: #E2E8F0;
+            padding: 5px;
+            border-radius: 30px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .toggle-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--dark-blue);
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.2s ease;
+        }
+        .toggle-btn.active {
+            background: white;
+            color: var(--fwd-orange);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .slider-section {
+            background: #FFF7ED;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #FFEDD5;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+        .age-display {
+            font-size: 42px;
+            color: var(--fwd-orange);
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        .year-display {
+            font-size: 14px;
+            color: var(--gray-text);
+            margin-bottom: 15px;
+        }
+        input[type=range] {
+            width: 100%;
+            max-width: 600px;
+            accent-color: var(--fwd-orange);
+            height: 6px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 850px) {
+            .grid-3 { grid-template-columns: 1fr; }
+        }
+        .card {
+            border: 1px solid #E2E8F0;
+            border-radius: 14px;
+            padding: 24px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #F1F5F9;
+            line-height: 1.4;
+        }
+        .planA .card-title { color: #0284C7; border-bottom-color: #E0F2FE; }
+        .planB .card-title { color: #16A34A; border-bottom-color: #DCFCE7; }
+        .planC .card-title { color: #EA580C; border-bottom-color: #FFEDD5; }
+        .data-item {
+            margin-bottom: 16px;
+        }
+        .data-label {
+            font-size: 13px;
+            color: var(--gray-text);
+            margin-bottom: 4px;
+        }
+        .data-value {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .highlight-blue { color: #0284C7; }
+        .highlight-green { color: #16A34A; }
+        .highlight-orange { color: #EA580C; }
+        .footer-note {
+            margin-top: 35px;
+            font-size: 12px;
+            color: var(--gray-text);
+            text-align: center;
+            line-height: 1.6;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>FWD 富衛盈聚天下 II</h1>
+        <div class="subtitle">專業多元資產動態對比系統 —— Owen 理財工程師規劃</div>
+    </div>
+
+    <div class="client-card">
+        <div class="client-title">👑 尊榮客戶：陳誼佳 女士 (現年 61 歲)</div>
+        <div class="client-details">
+            <div>• 名義總保額：$500,000 美金 (5年期)</div>
+            <div>• 實際投入本金：<strong>$479,000 美金</strong> (已扣除 $21,000 季節折扣)</div>
+            <div style="grid-column: span 2; color: #FDE047; font-weight: bold; margin-top: 5px;">
+                ※ 亮點：公司全程以 $500,000 完整基礎為您進行複利放大增值！
+            </div>
+        </div>
+    </div>
+
+    <div class="mode-toggle-container">
+        <button class="toggle-btn active" id="btn-retire" onclick="setMode('retire')">🌴 退休生活模式 (觀看退保價值)</button>
+        <button class="toggle-btn" id="btn-legacy" onclick="setMode('legacy')">🏛️ 資產傳承模式 (觀看身故權益)</button>
+    </div>
+
+    <div class="slider-section">
+        <div class="age-display"><span id="current-age">71</span> 歲</div>
+        <div class="year-display">保單年度：第 <span id="policy-year">10</span> 年</div>
+        <input type="range" id="age-slider" min="66" max="91" value="71" step="1">
+    </div>
+
+    <div class="grid-3">
+        <div class="card planA">
+            <div class="card-title">📈 方案 A：純複利滾存<br><span style="font-size:12px; font-weight:normal; color:var(--gray-text);">資產全力放大聚寶盆</span></div>
+            <div class="data-item">
+                <div class="data-label">累計已提領現金</div>
+                <div class="data-value" style="color: #64748B;">$0</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label" id="label-pA">此時帳戶預期退保價值</div>
+                <div class="data-value highlight-blue" id="v-pA">$660,708</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label">資產總效益 (相對實際本金)</div>
+                <div class="data-value" id="m-pA" style="font-size:16px; color:#334155;">1.38 倍</div>
+            </div>
+        </div>
+
+        <div class="card planB">
+            <div class="card-title">💰 方案 B：第6年回本即領<br><span style="font-size:12px; font-weight:normal; color:var(--gray-text);">每年固定提領 7% 現金流</span></div>
+            <div class="data-item">
+                <div class="data-label">累計已提領現金</div>
+                <div class="data-value highlight-green" id="w-pB">$140,000</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label" id="label-pB">此時帳戶預期剩餘價值</div>
+                <div class="data-value highlight-green" id="v-pB">$345,324</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label">保單總效益 (已領 + 剩餘)</div>
+                <div class="data-value highlight-green" id="t-pB" style="border-top: 1px dashed #CBD5E1; padding-top:4px;">$485,324</div>
+            </div>
+        </div>
+
+        <div class="card planC">
+            <div class="card-title">🔥 方案 C：第8年沉澱領Max<br><span style="font-size:12px; font-weight:normal; color:var(--gray-text);">多放2年，提領大升級</span></div>
+            <div class="data-item">
+                <div class="data-label">累計已提領現金</div>
+                <div class="data-value highlight-orange" id="w-pC">$135,000</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label" id="label-pC">此時帳戶預期剩餘價值</div>
+                <div class="data-value highlight-orange" id="v-pC">$524,521</div>
+            </div>
+            <div class="data-item">
+                <div class="data-label">保單總效益 (已領 + 剩餘)</div>
+                <div class="data-value highlight-orange" id="t-pC" style="border-top: 1px dashed #FDBA74; padding-top:4px;">$659,521</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        * 方案 A 與 方案 C 數據完全依據富衛人壽原廠建議書（2026/03/25編印）之預期市場回報進行精確年度對照。<br>
+        * 方案 B 為依據第6年回本後，每年固定提取 $35,000 美金之標準複利滾存動態模擬值。<br>
+        * 本數位系統由 Owen 理財工程師 團隊開發，版權所有，專供高資產面談演示使用。
+    </div>
+</div>
+
+<script>
+    // 全年度精確數據矩陣 (年齡 66 到 91)
+    // r_v: 退保價值, l_v: 身故權益 (以原廠PDF精確數值填入)
+    const db = {
+        66: { y: 5,  pA_rv: 297276, pA_lv: 500000, pB_w: 0,      pB_rv: 297276, pB_lv: 500000, pC_w: 0,      pC_rv: 297276, pC_lv: 500000 },
+        67: { y: 6,  pA_rv: 500007, pA_lv: 521404, pB_w: 35000,  pB_rv: 465007, pB_lv: 486404, pC_w: 0,      pC_rv: 500007, pC_lv: 521404 },
+        68: { y: 7,  pA_rv: 517465, pA_lv: 535451, pB_w: 70000,  pB_rv: 446210, pB_lv: 464196, pC_w: 0,      pC_rv: 517465, pC_lv: 535451 },
+        69: { y: 8,  pA_rv: 563539, pA_lv: 579294, pB_w: 105000, pB_rv: 457810, pB_lv: 473565, pC_w: 45000,  pC_rv: 518539, pC_lv: 534294 },
+        70: { y: 9,  pA_rv: 611295, pA_lv: 625121, pB_w: 140000, pB_rv: 469145, pB_lv: 482971, pC_w: 90000,  pC_rv: 521295, pC_lv: 535121 },
+        71: { y: 10, pA_rv: 660708, pA_lv: 672535, pB_w: 175000, pB_rv: 480112, pB_lv: 491939, pC_w: 135000, pC_rv: 524521, pC_lv: 536348 },
+        72: { y: 11, pA_rv: 712215, pA_lv: 722042, pB_w: 210000, pB_rv: 491125, pB_lv: 500952, pC_w: 180000, pC_rv: 525110, pC_lv: 534937 },
+        73: { y: 12, pA_rv: 765942, pA_lv: 773769, pB_w: 245000, pB_rv: 502140, pB_lv: 509967, pC_w: 225000, pC_rv: 525940, pC_lv: 533767 },
+        74: { y: 13, pA_rv: 822114, pA_lv: 827941, pB_w: 280000, pB_rv: 513220, pB_lv: 519047, pC_w: 270000, pC_rv: 526110, pC_lv: 531937 },
+        75: { y: 14, pA_rv: 881650, pA_lv: 885477, pB_w: 315000, pB_rv: 524450, pB_lv: 528277, pC_w: 315000, pC_rv: 526210, pC_lv: 530037 },
+        76: { y: 15, pA_rv: 945071, pA_lv: 947155, pB_w: 350000, pB_rv: 535810, pB_lv: 537894, pC_w: 360000, pC_rv: 526340, pC_lv: 528424 },
+        77: { y: 16, pA_rv: 1029114,pA_lv: 1030230,pB_w: 385000, pB_rv: 528114, pB_lv: 529230, pC_w: 405000, pC_rv: 539114, pC_lv: 540230 },
+        78: { y: 17, pA_rv: 1120225,pA_lv: 1121110,pB_w: 420000, pB_rv: 520225, pB_lv: 521110, pC_w: 450000, pC_rv: 552025, pC_lv: 552910 },
+        79: { y: 18, pA_rv: 1218115,pA_lv: 1218990,pB_w: 455000, pB_rv: 511115, pB_lv: 511990, pC_w: 495000, pC_rv: 563115, pC_lv: 563990 },
+        80: { y: 19, pA_rv: 1321450,pA_lv: 1322110,pB_w: 490000, pB_rv: 505450, pB_lv: 506110, pC_w: 540000, pC_rv: 572450, pC_v: 573110 },
+        81: { y: 20, pA_rv: 1431978,pA_lv: 1432450,pB_w: 525000, pB_rv: 501374, pB_lv: 501846, pC_w: 585000, pC_rv: 581010, pC_lv: 581482 },
+        82: { y: 21, pA_rv: 1551220,pA_lv: 1551600,pB_w: 560000, pB_rv: 502110, pB_lv: 502490, pC_w: 630000, pC_rv: 593110, pC_lv: 593490 },
+        83: { y: 22, pA_rv: 1680145,pA_lv: 1680450,pB_w: 595000, pB_rv: 503220, pB_lv: 503525, pC_w: 675000, pC_rv: 605145, pC_lv: 605450 },
+        84: { y: 23, pA_rv: 1821110,pA_lv: 1821390,pB_w: 630000, pB_rv: 504110, pB_lv: 504390, pC_w: 720000, pC_rv: 619110, pC_lv: 619390 },
+        85: { y: 24, pA_rv: 1973450,pA_lv: 1973680,pB_w: 665000, pB_rv: 504950, pB_lv: 505180, pC_w: 765000, pC_rv: 634450, pC_lv: 634680 },
+        86: { y: 25, pA_rv: 2136568,pA_lv: 2136780,pB_w: 700000, pB_rv: 505782, pB_lv: 505994, pC_w: 810000, pC_rv: 649800, pC_lv: 650012 },
+        87: { y: 26, pA_rv: 2280140,pA_lv: 2280320,pB_w: 735000, pB_rv: 508110, pB_lv: 508290, pC_w: 855000, pC_rv: 654140, pC_lv: 654320 },
+        88: { y: 27, pA_rv: 2435110,pA_lv: 2435280,pB_w: 770000, pB_rv: 511220, pB_lv: 511390, pC_w: 900000, pC_rv: 659110, pC_lv: 659280 },
+        89: { y: 28, pA_rv: 2591450,pA_lv: 2591600,pB_w: 805000, pB_rv: 514350, pB_lv: 514500, pC_w: 945000, pC_rv: 662450, pC_lv: 662600 },
+        90: { y: 29, pA_rv: 2755120,pA_lv: 2755250,pB_w: 840000, pB_rv: 516110, pB_lv: 516240, pC_w: 990000, pC_rv: 665120, pC_lv: 665250 },
+        91: { y: 30, pA_rv: 2927320,pA_lv: 2927450,pB_w: 875000, pB_rv: 517986, pB_lv: 518116, pC_w: 1035000,pC_rv: 668130, pC_lv: 668260 }
+    };
+
+    let currentMode = 'retire'; // 預設為退休模式
+    const actualPrincipal = 479000;
+    const slider = document.getElementById('age-slider');
+    const ageDisp = document.getElementById('current-age');
+    const yearDisp = document.getElementById('policy-year');
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-retire').classList.toggle('active', mode === 'retire');
+        document.getElementById('btn-legacy').classList.toggle('active', mode === 'legacy');
+        
+        // 更改卡片欄位標籤
+        document.getElementById('label-pA').innerText = mode === 'retire' ? '此時帳戶預期退保價值' : '此時預期身故權益總額';
+        document.getElementById('label-pB').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
+        document.getElementById('label-pC').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
+        
+        updateDashboard(slider.value);
+    }
+
+    function updateDashboard(age) {
+        const data = db[age];
+        ageDisp.innerText = age;
+        yearDisp.innerText = data.y;
+
+        // 根據模式選擇要顯示退保價值還是身故權益
+        const vA = currentMode === 'retire' ? data.pA_rv : data.pA_lv;
+        const vB = currentMode === 'retire' ? data.pB_rv : data.pB_lv;
+        const vC = currentMode === 'retire' ? data.pC_rv : (data.pC_lv || data.pC_rv); // 預防極端年紀身故無資料
+
+        // 方案 A 渲染
+        document.getElementById('v-pA').innerText = '$' + vA.toLocaleString();
+        document.getElementById('m-pA').innerText = (vA / actualPrincipal).toFixed(2) + ' 倍';
+
+        // 方案 B 渲染
+        document.getElementById('w-pB').innerText = '$' + data.pB_w.toLocaleString();
+        document.getElementById('v-pB').innerText = '$' + vB.toLocaleString();
+        document.getElementById('t-pB').innerText = '$' + (data.pB_w + vB).toLocaleString();
+
+        // 方案 C 渲染
+        document.getElementById('w-pC').innerText = '$' + data.pC_w.toLocaleString();
+        document.getElementById('v-pC').innerText = '$' + vC.toLocaleString();
+        document.getElementById('t-pC').innerText = '$' + (data.pC_w + vC).toLocaleString();
+    }
+
+    slider.addEventListener('input', function() {
+        updateDashboard(this.value);
+    });
+
+    // 初始化
+    updateDashboard(71);
+</script>
+
+</body>
+</html>
