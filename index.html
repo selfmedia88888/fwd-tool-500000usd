@@ -10,7 +10,6 @@
             --dark-blue: #0F172A;
             --light-bg: #F8FAFC;
             --gray-text: #64748B;
-            --tab-active: #FF6B00;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -64,16 +63,20 @@
             opacity: 0.9;
             line-height: 1.6;
         }
-        .mode-toggle-container {
+        .control-panel {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
             margin-bottom: 30px;
+        }
+        .toggle-container {
+            display: flex;
             background: #E2E8F0;
             padding: 5px;
             border-radius: 30px;
+            width: 100%;
             max-width: 450px;
-            margin-left: auto;
-            margin-right: auto;
         }
         .toggle-btn {
             flex: 1;
@@ -91,6 +94,12 @@
             background: white;
             color: var(--fwd-orange);
             box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .currency-container {
+            max-width: 250px;
+        }
+        .currency-container .toggle-btn.active {
+            color: #0284C7;
         }
         .slider-section {
             background: #FFF7ED;
@@ -180,17 +189,24 @@
     <div class="client-card">
         <div class="client-title">👑 尊榮客戶：陳誼佳 女士 (現年 61 歲)</div>
         <div class="client-details">
-            <div>• 名義總保額：$500,000 美金 (5年期)</div>
-            <div>• 實際投入本金：<strong>$479,000 美金</strong> (已扣除 $21,000 季節折扣)</div>
+            <div>• 名義總保額：<span id="info-face">USD 500,000</span></div>
+            <div>• 實際投入本金：<strong id="info-principal">USD 479,000</strong> (已省下 <span id="info-discount">USD 21,000</span>)</div>
             <div style="grid-column: span 2; color: #FDE047; font-weight: bold; margin-top: 5px;">
-                ※ 亮點：公司全程以 $500,000 完整基礎為您進行複利放大增值！
+                ※ 亮點：公司全程以完整名義額度為您進行複利放大增值！
             </div>
         </div>
     </div>
 
-    <div class="mode-toggle-container">
-        <button class="toggle-btn active" id="btn-retire" onclick="setMode('retire')">🌴 退休生活模式 (觀看退保價值)</button>
-        <button class="toggle-btn" id="btn-legacy" onclick="setMode('legacy')">🏛️ 資產傳承模式 (觀看身故權益)</button>
+    <div class="control-panel">
+        <div class="toggle-container">
+            <button class="toggle-btn active" id="btn-retire" onclick="setMode('retire')">🌴 退休生活模式 (觀看退保價值)</button>
+            <button class="toggle-btn" id="btn-legacy" onclick="setMode('legacy')">🏛️ 資產傳承模式 (觀看身故權益)</button>
+        </div>
+        
+        <div class="toggle-container currency-container">
+            <button class="toggle-btn active" id="btn-usd" onclick="setCurrency('USD')">🇺🇸 美元 (USD)</button>
+            <button class="toggle-btn" id="btn-twd" onclick="setCurrency('TWD')">🇹🇼 台幣 (TWD)</button>
+        </div>
     </div>
 
     <div class="slider-section">
@@ -204,7 +220,7 @@
             <div class="card-title">📈 方案 A：純複利滾存<br><span style="font-size:12px; font-weight:normal; color:var(--gray-text);">資產全力放大聚寶盆</span></div>
             <div class="data-item">
                 <div class="data-label">累計已提領現金</div>
-                <div class="data-value" style="color: #64748B;">$0</div>
+                <div class="data-value" style="color: #64748B;" id="w-pA">$0</div>
             </div>
             <div class="data-item">
                 <div class="data-label" id="label-pA">此時帳戶預期退保價值</div>
@@ -250,15 +266,14 @@
     </div>
 
     <div class="footer-note">
-        * 方案 A 與 方案 C 數據完全依據富衛人壽原廠建議書（2026/03/25編印）之預期市場回報進行精確年度對照。<br>
-        * 方案 B 為依據第6年回本後，每年固定提取 $35,000 美金之標準複利滾存動態模擬值。<br>
-        * 本數位系統由 Owen 理財工程師 團隊開發，版權所有，專供高資產面談演示使用。
+        * 方案 A 與 方案 C 數據完全依據富衛人壽原廠建議書（2026/03/25編印）預期回報精算；台幣換算統一以固定匯率 1 : 30 進行動態即時計算。<br>
+        * 方案 B 為依據第6年全面回本線後，每年提取 $35,000 美金（或台幣 105 萬元）之標準分紅保單複利滾存模擬值。<br>
+        * 本數位系統由 Owen 理財工程師 團隊開發，專供高資產面談演示使用。
     </div>
 </div>
 
 <script>
-    // 全年度精確數據矩陣 (年齡 66 到 91)
-    // r_v: 退保價值, l_v: 身故權益 (以原廠PDF精確數值填入)
+    // 原始美金精確數據矩陣
     const db = {
         66: { y: 5,  pA_rv: 297276, pA_lv: 500000, pB_w: 0,      pB_rv: 297276, pB_lv: 500000, pC_w: 0,      pC_rv: 297276, pC_lv: 500000 },
         67: { y: 6,  pA_rv: 500007, pA_lv: 521404, pB_w: 35000,  pB_rv: 465007, pB_lv: 486404, pC_w: 0,      pC_rv: 500007, pC_lv: 521404 },
@@ -274,7 +289,7 @@
         77: { y: 16, pA_rv: 1029114,pA_lv: 1030230,pB_w: 385000, pB_rv: 528114, pB_lv: 529230, pC_w: 405000, pC_rv: 539114, pC_lv: 540230 },
         78: { y: 17, pA_rv: 1120225,pA_lv: 1121110,pB_w: 420000, pB_rv: 520225, pB_lv: 521110, pC_w: 450000, pC_rv: 552025, pC_lv: 552910 },
         79: { y: 18, pA_rv: 1218115,pA_lv: 1218990,pB_w: 455000, pB_rv: 511115, pB_lv: 511990, pC_w: 495000, pC_rv: 563115, pC_lv: 563990 },
-        80: { y: 19, pA_rv: 1321450,pA_lv: 1322110,pB_w: 490000, pB_rv: 505450, pB_lv: 506110, pC_w: 540000, pC_rv: 572450, pC_v: 573110 },
+        80: { y: 19, pA_rv: 1321450,pA_lv: 1322110,pB_w: 490000, pB_rv: 505450, pB_lv: 506110, pC_w: 540000, pC_rv: 572450, pC_lv: 573110 },
         81: { y: 20, pA_rv: 1431978,pA_lv: 1432450,pB_w: 525000, pB_rv: 501374, pB_lv: 501846, pC_w: 585000, pC_rv: 581010, pC_lv: 581482 },
         82: { y: 21, pA_rv: 1551220,pA_lv: 1551600,pB_w: 560000, pB_rv: 502110, pB_lv: 502490, pC_w: 630000, pC_rv: 593110, pC_lv: 593490 },
         83: { y: 22, pA_rv: 1680145,pA_lv: 1680450,pB_w: 595000, pB_rv: 503220, pB_lv: 503525, pC_w: 675000, pC_rv: 605145, pC_lv: 605450 },
@@ -288,18 +303,20 @@
         91: { y: 30, pA_rv: 2927320,pA_lv: 2927450,pB_w: 875000, pB_rv: 517986, pB_lv: 518116, pC_w: 1035000,pC_rv: 668130, pC_lv: 668260 }
     };
 
-    let currentMode = 'retire'; // 預設為退休模式
-    const actualPrincipal = 479000;
+    let currentMode = 'retire'; 
+    let currentCurrency = 'USD';
+    const rate = 30; // 固定匯率 30
+
     const slider = document.getElementById('age-slider');
     const ageDisp = document.getElementById('current-age');
     const yearDisp = document.getElementById('policy-year');
 
+    // 切換退休/傳承模式
     function setMode(mode) {
         currentMode = mode;
         document.getElementById('btn-retire').classList.toggle('active', mode === 'retire');
         document.getElementById('btn-legacy').classList.toggle('active', mode === 'legacy');
         
-        // 更改卡片欄位標籤
         document.getElementById('label-pA').innerText = mode === 'retire' ? '此時帳戶預期退保價值' : '此時預期身故權益總額';
         document.getElementById('label-pB').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
         document.getElementById('label-pC').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
@@ -307,37 +324,68 @@
         updateDashboard(slider.value);
     }
 
+    // 切換美元/台幣幣別
+    function setCurrency(currency) {
+        currentCurrency = currency;
+        document.getElementById('btn-usd').classList.toggle('active', currency === 'USD');
+        document.getElementById('btn-twd').classList.toggle('active', currency === 'TWD');
+        
+        // 更新上方黑金字卡的基本資料
+        if (currency === 'USD') {
+            document.getElementById('info-face').innerText = 'USD 500,000';
+            document.getElementById('info-principal').innerText = 'USD 479,000';
+            document.getElementById('info-discount').innerText = 'USD 21,000';
+        } else {
+            document.getElementById('info-face').innerText = 'NTD 15,000,000';
+            document.getElementById('info-principal').innerText = 'NTD 14,370,000';
+            document.getElementById('info-discount').innerText = 'NTD 630,000';
+        }
+
+        updateDashboard(slider.value);
+    }
+
+    // 格式化數字輸出（帶有千分位與幣別前綴）
+    function formatNum(val) {
+        const factor = currentCurrency === 'USD' ? 1 : rate;
+        const prefix = currentCurrency === 'USD' ? '$' : 'NT$ ';
+        const finalVal = Math.round(val * factor);
+        return prefix + finalVal.toLocaleString();
+    }
+
     function updateDashboard(age) {
         const data = db[age];
         ageDisp.innerText = age;
         yearDisp.innerText = data.y;
 
-        // 根據模式選擇要顯示退保價值還是身故權益
-        const vA = currentMode === 'retire' ? data.pA_rv : data.pA_lv;
-        const vB = currentMode === 'retire' ? data.pB_rv : data.pB_lv;
-        const vC = currentMode === 'retire' ? data.pC_rv : (data.pC_lv || data.pC_rv); // 預防極端年紀身故無資料
+        // 決定基本變數來源是退保價值(rv)還是身故權益(lv)
+        const raw_vA = currentMode === 'retire' ? data.pA_rv : data.pA_lv;
+        const raw_vB = currentMode === 'retire' ? data.pB_rv : data.pB_lv;
+        const raw_vC = currentMode === 'retire' ? data.pC_rv : data.pC_lv;
 
         // 方案 A 渲染
-        document.getElementById('v-pA').innerText = '$' + vA.toLocaleString();
-        document.getElementById('m-pA').innerText = (vA / actualPrincipal).toFixed(2) + ' 倍';
+        document.getElementById('v-pA').innerText = formatNum(raw_vA);
+        // 倍數一律依據當前幣別對比
+        const basePrincipal = currentCurrency === 'USD' ? 479000 : (479000 * rate);
+        const currentValA = currentCurrency === 'USD' ? raw_vA : (raw_vA * rate);
+        document.getElementById('m-pA').innerText = (currentValA / basePrincipal).toFixed(2) + ' 倍';
 
         // 方案 B 渲染
-        document.getElementById('w-pB').innerText = '$' + data.pB_w.toLocaleString();
-        document.getElementById('v-pB').innerText = '$' + vB.toLocaleString();
-        document.getElementById('t-pB').innerText = '$' + (data.pB_w + vB).toLocaleString();
+        document.getElementById('w-pB').innerText = formatNum(data.pB_w);
+        document.getElementById('v-pB').innerText = formatNum(raw_vB);
+        document.getElementById('t-pB').innerText = formatNum(data.pB_w + raw_vB);
 
         // 方案 C 渲染
-        document.getElementById('w-pC').innerText = '$' + data.pC_w.toLocaleString();
-        document.getElementById('v-pC').innerText = '$' + vC.toLocaleString();
-        document.getElementById('t-pC').innerText = '$' + (data.pC_w + vC).toLocaleString();
+        document.getElementById('w-pC').innerText = formatNum(data.pC_w);
+        document.getElementById('v-pC').innerText = formatNum(raw_vC);
+        document.getElementById('t-pC').innerText = formatNum(data.pC_w + raw_vC);
     }
 
     slider.addEventListener('input', function() {
         updateDashboard(this.value);
     });
 
-    // 初始化
-    updateDashboard(71);
+    // 初始渲染
+    setCurrency('USD');
 </script>
 
 </body>
