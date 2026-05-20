@@ -337,4 +337,80 @@
         91: { y: 30, pA_rv: 2927320,pA_lv: 2927320,pB_w: 875000, pB_rv: 517986, pB_lv: 518116, pC_w: 1035000, pC_rv: 668130, pC_lv: 668130 }
     };
 
-    let currentMode = 'ret
+    let currentMode = 'retire'; 
+    let currentCurrency = 'USD';
+    const rate = 30;
+
+    const slider = document.getElementById('age-slider');
+    const ageDisp = document.getElementById('current-age');
+    const yearDisp = document.getElementById('policy-year');
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-retire').classList.toggle('active', mode === 'retire');
+        document.getElementById('btn-legacy').classList.toggle('active', mode === 'legacy');
+        
+        document.getElementById('label-pA').innerText = mode === 'retire' ? '此時帳戶預期退保價值' : '此時預期身故權益總額';
+        document.getElementById('label-pB').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
+        document.getElementById('label-pC').innerText = mode === 'retire' ? '此時帳戶預期剩餘價值' : '此時預期身故權益總額';
+        
+        updateDashboard(slider.value);
+    }
+
+    function setCurrency(currency) {
+        currentCurrency = currency;
+        document.getElementById('btn-usd').classList.toggle('active', currency === 'USD');
+        document.getElementById('btn-twd').classList.toggle('active', currency === 'TWD');
+        
+        if (currency === 'USD') {
+            document.getElementById('info-face').innerText = 'USD 500,000';
+            document.getElementById('info-principal').innerText = 'USD 479,000';
+            document.getElementById('info-discount').innerText = 'USD 21,000';
+        } else {
+            document.getElementById('info-face').innerText = 'NTD 15,000,000';
+            document.getElementById('info-principal').innerText = 'NTD 14,370,000';
+            document.getElementById('info-discount').innerText = 'NTD 630,000';
+        }
+
+        updateDashboard(slider.value);
+    }
+
+    function formatNum(val) {
+        const factor = currentCurrency === 'USD' ? 1 : rate;
+        const prefix = currentCurrency === 'USD' ? '$' : 'NT$ ';
+        const finalVal = Math.round(val * factor);
+        return prefix + finalVal.toLocaleString();
+    }
+
+    function updateDashboard(age) {
+        const data = db[age];
+        ageDisp.innerText = age;
+        yearDisp.innerText = data.y;
+
+        const raw_vA = currentMode === 'retire' ? data.pA_rv : data.pA_lv;
+        const raw_vB = currentMode === 'retire' ? data.pB_rv : data.pB_lv;
+        const raw_vC = currentMode === 'retire' ? data.pC_rv : data.pC_lv;
+
+        document.getElementById('v-pA').innerText = formatNum(raw_vA);
+        const basePrincipal = currentCurrency === 'USD' ? 479000 : (479000 * rate);
+        const currentValA = currentCurrency === 'USD' ? raw_vA : (raw_vA * rate);
+        document.getElementById('m-pA').innerText = (currentValA / basePrincipal).toFixed(2) + ' 倍';
+
+        document.getElementById('w-pB').innerText = formatNum(data.pB_w);
+        document.getElementById('v-pB').innerText = formatNum(raw_vB);
+        document.getElementById('t-pB').innerText = formatNum(data.pB_w + raw_vB);
+
+        document.getElementById('w-pC').innerText = formatNum(data.pC_w);
+        document.getElementById('v-pC').innerText = formatNum(raw_vC);
+        document.getElementById('t-pC').innerText = formatNum(data.pC_w + raw_vC);
+    }
+
+    slider.addEventListener('input', function() {
+        updateDashboard(this.value);
+    });
+
+    setCurrency('USD');
+</script>
+
+</body>
+</html>
